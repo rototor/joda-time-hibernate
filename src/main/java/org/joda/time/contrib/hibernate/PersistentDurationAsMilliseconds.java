@@ -15,17 +15,18 @@
  */
 package org.joda.time.contrib.hibernate;
 
+import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.usertype.UserType;
+import org.joda.time.Duration;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
-import org.hibernate.HibernateException;
-import org.hibernate.type.StandardBasicTypes;
-import org.hibernate.usertype.UserType;
-import org.joda.time.Duration;
 
 /**
  * Converts a org.joda.time.Duration to and from Sql for Hibernate. It simply
@@ -46,9 +47,9 @@ public class PersistentDurationAsMilliseconds implements UserType, Serializable 
     }
 
     public Object nullSafeGet(ResultSet resultSet, String[] strings,
-            Object object) throws HibernateException, SQLException {
+                              SharedSessionContractImplementor session, Object object) throws HibernateException, SQLException {
         BigInteger b = (BigInteger) StandardBasicTypes.BIG_INTEGER.nullSafeGet(
-                resultSet, strings[0]);
+                resultSet, strings[0],session);
         if (b == null) {
             return null;
         }
@@ -57,13 +58,13 @@ public class PersistentDurationAsMilliseconds implements UserType, Serializable 
     }
 
     public void nullSafeSet(PreparedStatement preparedStatement, Object value,
-            int index) throws HibernateException, SQLException {
+            int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null) {
             StandardBasicTypes.BIG_INTEGER.nullSafeSet(preparedStatement, null,
-                    index);
+                    index,session);
         } else {
             StandardBasicTypes.BIG_INTEGER.nullSafeSet(preparedStatement,
-                    BigInteger.valueOf((Long) value), index);
+                    BigInteger.valueOf((Long) value), index,session);
         }
     }
 

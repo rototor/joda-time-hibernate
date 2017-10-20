@@ -15,14 +15,15 @@
  */
 package org.joda.time.contrib.hibernate;
 
-import java.io.File;
-import java.sql.SQLException;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+
+import java.io.File;
+import java.sql.SQLException;
 
 public class TestPersistentDateTime extends HibernateTestCase
 {
@@ -37,6 +38,7 @@ public class TestPersistentDateTime extends HibernateTestCase
         SessionFactory factory = getSessionFactory();
 
         Session session = factory.openSession();
+        Transaction transaction = session.beginTransaction();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
@@ -50,7 +52,7 @@ public class TestPersistentDateTime extends HibernateTestCase
         }
 
         session.flush();
-        session.connection().commit();
+        transaction.commit();
         session.close();
 
         for (int i = 0; i<writeReadTimes.length; i++)
@@ -77,6 +79,7 @@ public class TestPersistentDateTime extends HibernateTestCase
         SessionFactory factory = getSessionFactory();
 
         Session session = factory.openSession();
+        Transaction transaction = session.beginTransaction();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
@@ -90,7 +93,7 @@ public class TestPersistentDateTime extends HibernateTestCase
         }
 
         session.flush();
-        session.connection().commit();
+        transaction.commit();
         session.close();
 
         for (int i = 0; i<writeReadTimes.length; i++)

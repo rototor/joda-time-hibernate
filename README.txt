@@ -1,4 +1,9 @@
 
+NOTE:
+=====
+
+This is a fork for Hibernate 5.2 support.
+
 Joda-Time Contributions area - Hibernate support
 ================================================
 Joda-Time is a date and time library that vastly improves on the JDK.

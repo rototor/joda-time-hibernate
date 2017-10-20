@@ -15,15 +15,16 @@
  */
 package org.joda.time.contrib.hibernate;
 
+import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.usertype.UserType;
+
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
-import org.hibernate.HibernateException;
-import org.hibernate.type.StandardBasicTypes;
-import org.hibernate.usertype.UserType;
 
 /**
  * @author gjoseph
@@ -36,8 +37,8 @@ public abstract class AbstractStringBasedJodaType implements UserType, Serializa
         return SQL_TYPES;
     }
 
-    public Object nullSafeGet(ResultSet resultSet, String[] strings, Object object) throws HibernateException, SQLException {
-        String s = (String) StandardBasicTypes.STRING.nullSafeGet(resultSet, strings[0]);
+    public Object nullSafeGet(ResultSet resultSet, String[] strings, SharedSessionContractImplementor session, Object object) throws HibernateException, SQLException {
+        String s = (String) StandardBasicTypes.STRING.nullSafeGet(resultSet, strings[0], session);
         if (s == null) {
             return null;
         }
@@ -47,11 +48,11 @@ public abstract class AbstractStringBasedJodaType implements UserType, Serializa
 
     protected abstract Object fromNonNullString(String s);
 
-    public void nullSafeSet(PreparedStatement preparedStatement, Object value, int index) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement preparedStatement, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null) {
-            StandardBasicTypes.STRING.nullSafeSet(preparedStatement, null, index);
+            StandardBasicTypes.STRING.nullSafeSet(preparedStatement, null, index,session);
         } else {
-            StandardBasicTypes.STRING.nullSafeSet(preparedStatement, toNonNullString(value), index);
+            StandardBasicTypes.STRING.nullSafeSet(preparedStatement, toNonNullString(value), index,session);
         }
     }
 

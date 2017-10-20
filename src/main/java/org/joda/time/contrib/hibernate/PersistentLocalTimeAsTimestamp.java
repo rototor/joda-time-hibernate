@@ -15,18 +15,15 @@
  */
 package org.joda.time.contrib.hibernate;
 
-import java.io.Serializable;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.usertype.EnhancedUserType;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalTime;
+
+import java.io.Serializable;
+import java.sql.*;
 
 /**
  * Persist {@link org.joda.time.LocalDate} via hibernate. This uses a standard
@@ -76,29 +73,27 @@ public class PersistentLocalTimeAsTimestamp implements EnhancedUserType, Seriali
         return false;
     }
 
-    public Object nullSafeGet(ResultSet resultSet, String string) throws SQLException {
-        Object timestamp = StandardBasicTypes.TIMESTAMP.nullSafeGet(resultSet, string);
+
+    public Object nullSafeGet(ResultSet resultSet, String[] strings, SharedSessionContractImplementor session, Object object) throws HibernateException, SQLException {
+        String string = strings[0];
+        Object timestamp = StandardBasicTypes.TIMESTAMP.nullSafeGet(resultSet, string,session);
         if (timestamp == null) {
             return null;
         }
 
         return new LocalTime(timestamp, DateTimeZone.UTC);
-    }
-
-    public Object nullSafeGet(ResultSet resultSet, String[] strings, Object object) throws HibernateException, SQLException {
-        return nullSafeGet(resultSet, strings[0]);
 
     }
 
-    public void nullSafeSet(PreparedStatement preparedStatement, Object value, int index) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement preparedStatement, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null) {
             StandardBasicTypes.TIMESTAMP.nullSafeSet(preparedStatement, null,
-                    index);
+                    index,session);
         } else {
             LocalTime lt = ((LocalTime) value);
             Timestamp timestamp = new Timestamp(lt.getMillisOfDay());
             StandardBasicTypes.TIMESTAMP.nullSafeSet(preparedStatement,
-                    timestamp, index);
+                    timestamp, index,session);
         }
     }
 

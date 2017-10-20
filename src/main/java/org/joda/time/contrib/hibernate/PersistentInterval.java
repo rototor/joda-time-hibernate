@@ -15,19 +15,21 @@
  */
 package org.joda.time.contrib.hibernate;
 
-import java.io.Serializable;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-
 import org.hibernate.HibernateException;
-import org.hibernate.engine.SessionImplementor;
+import org.hibernate.cfg.NotYetImplementedException;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.Type;
 import org.hibernate.usertype.CompositeUserType;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+
+import java.io.Serializable;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 
 /**
  * Persist {@link org.joda.time.Interval} via hibernate. Internally, this class
@@ -41,6 +43,7 @@ import org.joda.time.Interval;
  * 
  * @author Christopher R. Gardner (chris_gardner76@yahoo.com)
  */
+@Deprecated
 public class PersistentInterval implements CompositeUserType, Serializable {
 
     private static final String[] PROPERTY_NAMES = new String[] { "start", "end" };
@@ -90,21 +93,33 @@ public class PersistentInterval implements CompositeUserType, Serializable {
         return false;
     }
 
-    public Object nullSafeGet(ResultSet resultSet, String[] names, SessionImplementor session, Object owner)
+    public Serializable disassemble(Object value, SharedSessionContractImplementor session) throws HibernateException {
+        throw new NotYetImplementedException();
+    }
+
+    public Object assemble(Serializable cached, SharedSessionContractImplementor session, Object owner) throws HibernateException {
+        throw new NotYetImplementedException();
+    }
+
+    public Object replace(Object original, Object target, SharedSessionContractImplementor session, Object owner) throws HibernateException {
+    	throw new NotYetImplementedException();
+    }
+
+    public Object nullSafeGet(ResultSet resultSet, String[] names, SharedSessionContractImplementor session, Object owner)
             throws HibernateException, SQLException {
         if (resultSet == null) {
             return null;
         }
         PersistentDateTime pst = new PersistentDateTime();
-        DateTime start = (DateTime) pst.nullSafeGet(resultSet, names[0]);
-        DateTime end = (DateTime) pst.nullSafeGet(resultSet, names[1]);
+        DateTime start = (DateTime) pst.nullSafeGet(resultSet, new String[]{names[0]},session,owner);
+        DateTime end = (DateTime) pst.nullSafeGet(resultSet, new String[]{names[1]},session,owner);
         if (start == null || end == null) {
             return null;
         }
         return new Interval(start, end);
     }
 
-    public void nullSafeSet(PreparedStatement statement, Object value, int index, SessionImplementor session)
+    public void nullSafeSet(PreparedStatement statement, Object value, int index, SharedSessionContractImplementor session)
             throws HibernateException, SQLException {
         if (value == null) {
             statement.setNull(index, StandardBasicTypes.TIMESTAMP.sqlType());

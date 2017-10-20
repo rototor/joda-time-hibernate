@@ -15,18 +15,15 @@
  */
 package org.joda.time.contrib.hibernate;
 
-import java.io.Serializable;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Types;
-
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.usertype.EnhancedUserType;
 import org.joda.time.DateTime;
 import org.joda.time.TimeOfDay;
+
+import java.io.Serializable;
+import java.sql.*;
 
 /**
  * Persist {@link org.joda.time.TimeOfDay} via hibernate.
@@ -67,13 +64,10 @@ public class PersistentTimeOfDay implements EnhancedUserType, Serializable {
         return object.hashCode();
     }
 
-    public Object nullSafeGet(ResultSet resultSet, String[] strings, Object object) throws HibernateException, SQLException {
-        return nullSafeGet(resultSet, strings[0]);
+    public Object nullSafeGet(ResultSet resultSet, String[] strings, SharedSessionContractImplementor session, Object object) throws HibernateException, SQLException {
+        String string = strings[0];
 
-    }
-
-    public Object nullSafeGet(ResultSet resultSet, String string) throws SQLException {
-        Object date = StandardBasicTypes.TIME.nullSafeGet(resultSet, string);
+        Object date = StandardBasicTypes.TIME.nullSafeGet(resultSet, string,session);
         if (date == null) {
             return null;
         }
@@ -81,12 +75,12 @@ public class PersistentTimeOfDay implements EnhancedUserType, Serializable {
         return new TimeOfDay(date);
     }
 
-    public void nullSafeSet(PreparedStatement preparedStatement, Object value, int index) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement preparedStatement, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null) {
-            StandardBasicTypes.TIME.nullSafeSet(preparedStatement, null, index);
+            StandardBasicTypes.TIME.nullSafeSet(preparedStatement, null, index,session);
         } else {
             StandardBasicTypes.TIME.nullSafeSet(preparedStatement,
-                    new Time(((TimeOfDay) value).toDateTime(timeBase).getMillis()), index);
+                    new Time(((TimeOfDay) value).toDateTime(timeBase).getMillis()), index,session);
         }
     }
 
